@@ -10,14 +10,14 @@ use sirius::{
         step_circuit::{trivial, AssignedCell, ConstraintSystem, Layouter},
         SynthesisError,
     },
-    prelude::{
+    sangria_prelude::{
         bn256::{new_default_pp, C1Affine, C1Scalar, C2Affine, C2Scalar},
-        CommitmentKey, PrimeField, StepCircuit, IVC,
+        CommitmentKey, PrimeField, StepCircuit, SangriaIVC as IVC,
     },
 };
 
 /// Number of folding steps
-const FOLD_STEP_COUNT: usize = 5;
+const FOLD_STEP_COUNT: usize = 4;
 
 // === PRIMARY ===
 
@@ -185,7 +185,7 @@ impl<F: PrimeField, const N: usize> StepCircuit<A1, F> for FibonacciCircuit<N> {
 }
 
 fn main() {
-    let sc1 = FibonacciCircuit::<10> {};
+    let sc1 = FibonacciCircuit::<4> {};
     let sc2 = trivial::Circuit::<A2, C2Scalar>::default();
 
     // This folder will store the commitment key so that we don't have to generate it every time.
@@ -238,10 +238,17 @@ fn main() {
         // you can modify circuit data here
         ivc.fold_step(&pp, &sc1, &sc2)
             .expect("failed to run fold step");
+        println!("ZI: {:?}", ivc.primary_zi());
+        let mut zi = ivc.primary_zi().clone();
+        zi[0] += C1Scalar::ONE;
+        if step == 1 {
+            ivc.change_zi(zi);
+        }
 
         println!("folding step {step} was successful");
     }
 
+    println!("Error: {:?}", ivc.error());
     ivc.verify(&pp).expect("failed to verify ivc");
     println!("verification successful");
 

@@ -6,4 +6,4 @@ repository = "https://github.com/snarkify/sirius-fibonacci-example"
 license = "MIT"
 
 [dependencies]
-sirius = { git = "https://github.com/snarkify/sirius/", tag = "v0.1.1", version = "0.1.1" }
+sirius = { git = "https://github.com/Jiangkm3/sirius" }
